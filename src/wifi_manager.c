@@ -550,7 +550,7 @@ char* wifi_manager_get_ap_list_json(){
  * @brief Standard wifi event handler
  */
 static void wifi_manager_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){
-
+	if (!task_wifi_manager) return;
 
 	if (event_base == WIFI_EVENT){
 
@@ -774,6 +774,11 @@ char* wifi_manager_get_ip_info_json(){
 
 
 void wifi_manager_destroy(){
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_manager_event_handler));
+    ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, ESP_EVENT_ANY_ID, &wifi_manager_event_handler));
+	//run condition if some event is still going?
+	//hack:
+	vTaskDelay(pdMS_TO_TICKS(100));
 
 	vTaskDelete(task_wifi_manager);
 	task_wifi_manager = NULL;
